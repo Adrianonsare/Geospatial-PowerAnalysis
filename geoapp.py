@@ -20,6 +20,12 @@ from streamlit.elements.media import YOUTUBE_RE
 import base64
 from io import BytesIO
 
+st.set_page_config(
+page_icon="https://image.freepik.com/free-photo/electricity-pylon-isolated_1127-3233.jpg",
+layout="wide",
+initial_sidebar_state="expanded"
+)
+
 
 # Streamlit App Title
 st.title("Geospatial Power System Analysis")
@@ -37,10 +43,10 @@ st.sidebar.info("Select and Enter Calculation Parameters")
 #####################################################################
 @st.cache(allow_output_mutation=True)
 def create_net():
-    bus=pd.read_excel('line_data.xlsx',sheet_name='bus',index_col=0)
-    trafos=pd.read_excel('line_data.xlsx',sheet_name='trafos',index_col=0)
-    lines=pd.read_excel('line_data.xlsx',sheet_name='lines',index_col=0)
-    loads=pd.read_excel('line_data.xlsx',sheet_name='load',index_col=0)
+    bus=pd.read_excel('NetWork Data.xlsx',sheet_name='bus',index_col=0)
+    trafos=pd.read_excel('NetWork Data.xlsx',sheet_name='trafos',index_col=0)
+    lines=pd.read_excel('NetWork Data.xlsx',sheet_name='lines',index_col=0)
+    loads=pd.read_excel('NetWork Data.xlsx',sheet_name='load',index_col=0)
     net=pp.create_empty_network()
     bus.head()
 
