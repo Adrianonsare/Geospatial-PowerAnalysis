@@ -17,6 +17,8 @@ import geopandas as gpd
 import contextily as ctx
 import streamlit as st
 from streamlit.elements.media import YOUTUBE_RE
+import base64
+from io import BytesIO
 
 
 # Streamlit App Title
@@ -85,7 +87,6 @@ net=create_net()
 
 Calculations=['Power Flow Analysis','Short Circuit Analysis']
 CalcSelect=st.sidebar.radio("Select Calculation",Calculations)
-st.write(CalcSelect)
 
 #####################################################################
 
@@ -114,6 +115,36 @@ if CalcSelect == "Power Flow Analysis":
     RunLoadFlow=st.sidebar.button("Calculate")
     if RunLoadFlow:
         pp.runpp(net,algorithm= Algoselect,init=InitSelect,enforce_q_lims=QlimSelect)
+ ####################################################################
+ # Download Results
+        @st.cache
+        def create_res_excel():
+            bus_res=pd.merge(net.bus,net.res_bus,left_index=True, right_index=True)
+            bus_res=pd.merge(bus_res,net.bus_geodata,left_index=True, right_index=True)
+            lines_res=pd.merge(net.line,net.res_line,left_index=True, right_index=True)
+            trafo_res=pd.merge(net.trafo,net.res_trafo,left_index=True, right_index=True)
+            load_res=pd.merge(net.load,net.res_load,left_index=True, right_index=True)
+            ext_grid_res=pd.merge(net.ext_grid,net.res_ext_grid,left_index=True, right_index=True)
+            # Create a Pandas Excel writer using XlsxWriter as the engine.
+            output=BytesIO()
+            writer = pd.ExcelWriter(output, engine='xlsxwriter')
+            # Write each dataframe to a different worksheet.
+            bus_res.to_excel(writer, sheet_name='Bus_Results')
+            lines_res.to_excel(writer, sheet_name='Line_Results')
+            trafo_res.to_excel(writer, sheet_name='Trafo_Results')
+            load_res.to_excel(writer, sheet_name='Load_Results')
+            ext_grid_res.to_excel(writer, sheet_name='Ext_Grid Results')
+            # Close the Pandas Excel writer and output the Excel file.
+            writer.save()
+            processed_data = output.getvalue()
+            return processed_data 
+        processed_data =create_res_excel()
+        st.download_button(
+        label="Download LoadFlow Results File",
+        data=processed_data ,
+        file_name= 'LoadFlowResults.xlsx'
+        
+ )
 
         col1,col2,col3,col4=st.columns(4)
         with col1:
@@ -135,35 +166,21 @@ if CalcSelect == "Power Flow Analysis":
             fig = px.box(net.res_trafo, y='loading_percent',title="Transformer Loading Distr.",color_discrete_sequence=['goldenrod'])
             st.plotly_chart(fig,use_container_width=True)
 
-        # colz1,colz2=st.columns(2)
-        # bus_res=pd.merge(net.bus,net.res_bus,left_index=True, right_index=True)
-        # bus_res=pd.merge(bus_res,net.bus_geodata,left_index=True, right_index=True)
-        # lines_res=pd.merge(net.line,net.res_line,left_index=True, right_index=True)
-        # with colz1:
-        #     fig = px.histogram(net.res_bus, x='vm_pu',title="Bus Voltage Distr.",color_discrete_sequence=['red'])
-        #     st.plotly_chart(fig,use_container_width=True)
-        # with colus1:
-        #     fig = px.box(net.res_trafo, y='loading_percent',title="Transformer Loading Distr.",color_discrete_sequence=['goldenrod'])
-        #     st.plotly_chart(fig,use_container_width=True)
+
     else:
         st.sidebar.write("Press To Calculate Load Flow")
- 
-    # with colus2:
-    #     fig1 = px.box(net.res_line,y='loading_percent',title="Line Loading Distr.")
-    #     st.plotly_chart(fig1,use_container_width=True)
+
 #####################################################################
 
 
-# ReactiveLim=[True,False]
-
 else:
     SelFaultType=st.sidebar.selectbox("Select Fault Type",FaultType)#options=list(Algorithms.keys()))
-    SelectCaseType=st.sidebar.selectbox("Select Initialization Method",Case)
+    SelectCaseType=st.sidebar.selectbox("Select Fault Case",Case)
     
     # if Case='min':
-    ExtGridMVAInput=st.sidebar.number_input("Minimum Ext.Grid Short Cct MVA")
-    ExtGridrxmin=st.sidebar.number_input("Minimum Ext.Grid rx_min",min_value=0,max_value=1)
-    Temp_Rise=st.sidebar.number_input("Max Temp Rise",min_value=0)
+    ExtGridMVAInput=st.sidebar.number_input("Ext.Grid Short Cct MVA")
+    ExtGridrxmin=st.sidebar.number_input("Ext.Grid rx_min",min_value=0.0,max_value=1.0,value=0.0)
+    Temp_Rise=st.sidebar.number_input("Max Temp Rise",min_value=0.0,value=0.0)
     net.ext_grid["s_sc_min_mva"] = ExtGridMVAInput
     net.ext_grid["s_sc_max_mva"] = ExtGridMVAInput
     net.ext_grid["rx_min"] = ExtGridrxmin
@@ -178,13 +195,7 @@ else:
             st.metric("Max Short Circuit",round(net.res_bus_sc['ikss_ka'].max(),2))
         with col2:
             st.metric("Min Short Circuit Current",round(net.res_bus_sc['ikss_ka'].min(),2))
-        # with col3:
-        #     st.metric("Ploss(%)",round(net.res_line['pl_mw'].sum()/net.res_ext_grid['p_mw'].sum(),2))
-        # with col4:
-        #     st.metric("Total Import/Export(MW)",round(net.res_ext_grid['p_mw'].sum(),2))
 
-        # figz=pf_res_plotly(net, on_map=True, projection='epsg:4326', map_style='satellite')
-        # st.plotly_chart(figz,use_container_width=True)
         colus,colus1=st.columns(2)
         with colus:
             fig = px.histogram(net.res_bus_sc, x='ikss_ka',title="Short Circuit Current Distribution",color_discrete_sequence=['red'])
@@ -204,23 +215,19 @@ else:
                 bus_res_sc['ShortCctRating']=0
                 
         bus_res_sc['PercShortCctRating']=bus_res_sc["ikss_ka"]/bus_res_sc['ShortCctRating']
-        geoBusResults = gpd.GeoDataFrame(bus_res_sc, geometry=gpd.points_from_xy(bus_res_sc['x'],
-            bus_res_sc['y']),crs="EPSG:4326")
-        nbogrid=gpd.read_file('/home/adrian/Desktop/DATASCIENCE/POWER SYSTEMS/MODELING/HardyGeo/nairobi_hexclusters.json')
-        nbogrid=nbogrid.to_crs(epsg=4326)
-        join_right_df = gpd.sjoin(nbogrid,geoBusResults, how="inner")
-        figz2 = px.choropleth(join_right_df, geojson=join_right_df.geometry, locations=join_right_df.DISPLAY_NAME, color="PercShortCctRating")
+       
+        bus_res_sc=bus_res_sc.sort_values(by='PercShortCctRating',ascending=False)
+
+        figz2 = px.bar(bus_res_sc[:10], x='name',y='PercShortCctRating',
+        title="Ik Percentage of Switchgear Rating Per Bus (Top 10)",
+        labels={"name":"BusName","PercShortCctRating":"% Switchgear Rating"})
         figz2.update_geos(fitbounds="locations", visible=False)
         st.plotly_chart(figz2,use_container_width=True)
+        st.balloons()
 
     else:
-        st.sidebar.write("Press button to Calculate Short Circuits")
+        st.sidebar.write("Press Button to Calculate Short Circuits")
     
-    # with colus2:
-    #     fig1 = px.box(net.res_line,y='loading_percent',title="Line Loading Distr.")
-    #     st.plotly_chart(fig1,use_container_width=True)
 
 
 #####################################################################
-# sns.displot(net.res_line['loading_percent'])
-# plt.show()
