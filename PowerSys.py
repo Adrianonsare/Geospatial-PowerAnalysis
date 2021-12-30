@@ -13,7 +13,6 @@ import pandapower as pp
 import pandapower.shortcircuit as sc
 import pandapower.plotting.plotly as plty
 from pandapower.plotting.plotly import simple_plotly, pf_res_plotly, vlevel_plotly
-import geopandas as gpd
 import contextily as ctx
 import streamlit as st
 from streamlit.elements.media import YOUTUBE_RE
