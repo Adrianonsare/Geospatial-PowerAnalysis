@@ -31,8 +31,8 @@ st.title("Geospatial Power System Analysis")
 st.markdown("""
 This application demosntrates a web-based geospatial power flow analysis 
 .The application makes use of actual data from a distribution feeder in Nairobi,Kenya.
-It makes use of the followign resurces.
-* **PandaPower Library** : Pandapower combines the data analysis library pandas and
+It primarily makes use of the Pandapower Library.
+Pandapower combines the data analysis library pandas and
 the power flow solver PYPOWER to create a power systems analysis package for
 automation of analysis and optimization in power systems.
 Aside from that, it allows for geospatial plotting of te network, as long as 
@@ -115,7 +115,7 @@ Case=['max','min']
 if CalcSelect == "Power Flow Analysis":
     Algoselect=st.sidebar.selectbox("Select Algorithm",list(Algorithms.keys()),format_func=lambda x: Algorithms.get(x))#options=list(Algorithms.keys()))
     InitSelect=st.sidebar.selectbox("Select Initialization Method",list(Initialization.keys()),format_func=lambda x: Initialization.get(x))
-    QlimSelect=st.sidebar.selectbox("Enforce Qlimits?",ReactiveLim)
+    QlimSelect=st.sidebar.selectbox("Enforce Reactive Power limits?",ReactiveLim)
     MaxIter=st.sidebar.number_input("Enter Maximum Iterations",min_value=0,max_value=100,step=1)
     RunLoadFlow=st.sidebar.button("Calculate")
     if RunLoadFlow:
@@ -153,15 +153,15 @@ if CalcSelect == "Power Flow Analysis":
 
         col1,col2,col3,col4=st.columns(4)
         with col1:
-            st.metric("Vmax(pu)",round(net.res_bus['vm_pu'].max(),2))
+            st.metric("Max Voltage_pu",round(net.res_bus['vm_pu'].max(),2))
         with col2:
-            st.metric("Vmin(pu)",round(net.res_bus['vm_pu'].min(),2))
+            st.metric("Min Voltage_pu",round(net.res_bus['vm_pu'].min(),2))
         with col3:
             st.metric("Ploss(%)",round(net.res_line['pl_mw'].sum()/net.res_ext_grid['p_mw'].sum(),2))
         with col4:
             st.metric("Total Import/Export(MW)",round(net.res_ext_grid['p_mw'].sum(),2))
 
-        figz=pf_res_plotly(net, on_map=True, projection='epsg:4326', map_style='satellite')
+        figz=pf_res_plotly(net, figsize=2,on_map=True, projection='epsg:4326', map_style='satellite',auto_open=False)
         st.plotly_chart(figz,use_container_width=True)
         colus,colus1=st.columns(2)
         with colus:
