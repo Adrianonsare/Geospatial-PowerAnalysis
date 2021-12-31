@@ -190,7 +190,7 @@ else:
 
         col1,col2=st.columns(2)
         with col1:
-            st.metric("Max Short Circuit",round(net.res_bus_sc['ikss_ka'].max(),2))
+            st.metric("Max Short Circuit Current",round(net.res_bus_sc['ikss_ka'].max(),2))
         with col2:
             st.metric("Min Short Circuit Current",round(net.res_bus_sc['ikss_ka'].min(),2))
 
