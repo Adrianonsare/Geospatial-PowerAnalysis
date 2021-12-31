@@ -24,13 +24,9 @@ initial_sidebar_state="expanded"
 st.title("Geospatial Power System Analysis")
 st.markdown("""
 This application demosntrates a web-based geospatial power flow analysis 
-.The application makes use of actual data from a distribution feeder in Nairobi,Kenya.
-It primarily makes use of the Pandapower Library.
-Pandapower combines the data analysis library pandas and
-the power flow solver PYPOWER to create a power systems analysis package for
-automation of analysis and optimization in power systems.
-Aside from that, it allows for geospatial plotting of te network, as long as 
-network geodata is provided.
+.The application undertakes power system analysis using datafrom a distribution feeder in Nairobi,Kenya.
+The app makes use of Qgis for vector data preparation,the Pandas python library for data exploration and analysis,
+the Pandapower Library for the Power System Analysis and visualization, and the Streamlit plafrom for web deployment.
 """)
 st.sidebar.info("Select and Enter Calculation Parameters")
 #####################################################################
