@@ -102,7 +102,7 @@ Initialization={'auto':"Auto",'flat':'FlatStart','dc':'DC',
 ReactiveLim=[True,False]
 
 #ShortCircuit Params
-FaultType=["1ph",'2ph','3ph']
+# FaultType=["1ph",'2ph','3ph']
 Case=['max','min']
 
 if CalcSelect == "Power Flow Analysis":
@@ -172,7 +172,7 @@ if CalcSelect == "Power Flow Analysis":
 
 
 else:
-    SelFaultType=st.sidebar.selectbox("Select Fault Type",FaultType)#options=list(Algorithms.keys()))
+    # SelFaultType=st.sidebar.selectbox("Select Fault Type",FaultType)#options=list(Algorithms.keys()))
     SelectCaseType=st.sidebar.selectbox("Select Fault Case",Case)
     
     # if Case='min':
@@ -186,7 +186,7 @@ else:
     net.line["endtemp_degree"] = Temp_Rise
     RunSCCalc=st.sidebar.button("Calculate Short Circuits")
     if RunSCCalc:
-        sc.calc_sc(net, case=SelectCaseType,fault=SelFaultType)
+        sc.calc_sc(net, case=SelectCaseType,fault='3ph')
 
         col1,col2=st.columns(2)
         with col1:
