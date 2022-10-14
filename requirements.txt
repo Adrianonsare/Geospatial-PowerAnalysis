@@ -1,3 +1,4 @@
+IPython
 numpy==1.20.1
 pandapower==2.7.0
 pandas==1.2.4

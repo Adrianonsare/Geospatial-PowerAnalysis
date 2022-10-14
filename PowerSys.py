@@ -7,6 +7,7 @@ import seaborn as sns
 import pandapower as pp
 import pandapower.shortcircuit as sc
 import pandapower.plotting.plotly as plty
+import IPython
 from pandapower.plotting.plotly import simple_plotly, pf_res_plotly, vlevel_plotly
 import streamlit as st
 from pandapower.plotting.plotly.mapbox_plot import set_mapbox_token
