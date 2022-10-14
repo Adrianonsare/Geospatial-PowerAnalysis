@@ -10,7 +10,7 @@ import pandapower.plotting.plotly as plty
 from pandapower.plotting.plotly import simple_plotly, pf_res_plotly, vlevel_plotly
 import streamlit as st
 from pandapower.plotting.plotly.mapbox_plot import set_mapbox_token
-import xlsxwriter
+# import xlsxwriter
 import plotly.express as px
 import base64
 from io import BytesIO
