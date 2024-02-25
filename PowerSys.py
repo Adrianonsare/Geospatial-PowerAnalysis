@@ -85,7 +85,7 @@ net=create_net()
 
 Calculations=['Power Flow Analysis','Short Circuit Analysis']
 CalcSelect=st.sidebar.radio("Select Calculation",Calculations)
-set_mapbox_token(st.secrets["MapboxToken"])
+set_mapbox_token(st.secrets["MapboxToken"]["st_secrets"])
 
 #####################################################################
 
